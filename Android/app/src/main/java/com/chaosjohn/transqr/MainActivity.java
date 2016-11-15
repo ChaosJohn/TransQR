@@ -6,10 +6,8 @@ import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -18,7 +16,6 @@ import java.net.URISyntaxException;
 
 import io.socket.client.IO;
 import io.socket.client.Socket;
-import io.socket.emitter.Emitter;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -46,43 +43,29 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                mSocket.emit("chat message", String.valueOf(System.currentTimeMillis()));
-            }
-        });
+        fab.setOnClickListener(view -> mSocket.emit("chat message", String.valueOf(System.currentTimeMillis())));
 
         mSocket.connect();
-        mSocket.on("response", new Emitter.Listener() {
-            @Override
-            public void call(final Object... args) {
-                if (0 < args.length && args[0] instanceof String)
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-//                            Toast.makeText(getApplicationContext(), args[0].toString(), Toast.LENGTH_LONG).show();
-                            history.setText(history.getText().toString() + "\n" + args[0].toString());
-                        }
-                    });
-            }
+        mSocket.on("response", args -> {
+            if (0 < args.length && args[0] instanceof String)
+                runOnUiThread(() -> {
+                    //Toast.makeText(getApplicationContext(), args[0].toString(), Toast.LENGTH_LONG).show();
+                    history.setText(history.getText().toString() + "\n" + args[0].toString());
+                });
         });
 
         history = (TextView) findViewById(R.id.history);
 
         msg = (EditText) findViewById(R.id.msg);
-        msg.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-            @Override
-            public boolean onEditorAction(TextView textView, int actionId, KeyEvent keyEvent) {
-                if (actionId == EditorInfo.IME_ACTION_SEND) {
-                    String message = msg.getText().toString();
-                    mSocket.emit("chat message", "[" + getDeviceName() + "]" + message);
-                    history.setText(history.getText().toString() + "\n[Me]" + message);
-                    msg.setText("");
-                    return true;
-                }
-                return false;
+        msg.setOnEditorActionListener((textView, actionId, keyEvent) -> {
+            if (actionId == EditorInfo.IME_ACTION_SEND) {
+                String message = msg.getText().toString();
+                mSocket.emit("chat message", "[" + getDeviceName() + "]" + message);
+                history.setText(history.getText().toString() + "\n[Me]" + message);
+                msg.setText("");
+                return true;
             }
+            return false;
         });
     }
 
