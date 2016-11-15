@@ -4,7 +4,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.KeyEvent;
@@ -14,16 +13,17 @@ import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
-
-import com.github.nkzawa.emitter.Emitter;
-import com.github.nkzawa.socketio.client.IO;
-import com.github.nkzawa.socketio.client.Socket;
 
 import java.net.URISyntaxException;
 
+import io.socket.client.IO;
+import io.socket.client.Socket;
+import io.socket.emitter.Emitter;
+
 public class MainActivity extends AppCompatActivity {
 
+    EditText msg;
+    TextView history;
     private Socket mSocket;
 
     {
@@ -33,8 +33,10 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    EditText msg;
-    TextView history;
+    @SuppressWarnings("static-access")
+    public static String getDeviceName() {
+        return new Build().MODEL;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,7 +70,7 @@ public class MainActivity extends AppCompatActivity {
 
         history = (TextView) findViewById(R.id.history);
 
-        msg = (EditText)findViewById(R.id.msg);
+        msg = (EditText) findViewById(R.id.msg);
         msg.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView textView, int actionId, KeyEvent keyEvent) {
@@ -84,16 +86,24 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    @SuppressWarnings("static-access")
-    public static String getDeviceName(){
-        return new Build().MODEL;
-    }
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+
+        mSocket.disconnect();
+//        mSocket.off("off[" + getDeviceName() + "]", new Emitter.Listener() {
+//            @Override
+//            public void call(Object... args) {
+//
+//            }
+//        });
     }
 
     @Override
