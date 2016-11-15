@@ -1,0 +1,22 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.chaosjohn.transqr.MainActivity">
+    <item
+        android:id="@+id/action_disconnect"
+        android:orderInCategory="100"
+        android:title="disconnect"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_connect"
+        android:orderInCategory="100"
+        android:title="connect"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_reconnect"
+        android:orderInCategory="100"
+        android:title="reconnect"
+        app:showAsAction="never" />
+</menu>
